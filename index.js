@@ -1,4 +1,18 @@
-const express = require('express')
+const express = require('express');
+const { MongoClient } = require('mongodb');
+
+const dbUrl = "mongodb+srv://admin:yJaZxMwMfh9rbAG3@cluster0.0qd0vfc.mongodb.net";
+const client = new MongoClient(dbUrl);
+const dbName = "ocean-backend-dezembro-2023";
+
+async function main() {
+  console.log("Conectando ao banco de dados...");
+  await client.connect();
+  console.log("Banco de dados conectado com sucesso");
+
+  const db = client.db(dbName);
+  const collection = db.collection("item");
+
 const app = express()
 
 // Registrar um Middleware de JSON
@@ -79,3 +93,6 @@ app.delete("/item/:id", function (req, res) {
 })
 
 app.listen(3000)
+}
+
+main();
