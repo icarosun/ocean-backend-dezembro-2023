@@ -13,86 +13,88 @@ async function main() {
   const db = client.db(dbName);
   const collection = db.collection("item");
 
-const app = express()
+  const app = express()
 
-// Registrar um Middleware de JSON
-// Indica que todas as requisições podem receber
-// Body em JSON. A partir disso, o Express aplica
-// um JSON.parse para o conteúdo recebido
-app.use(express.json())
+  // Registrar um Middleware de JSON
+  // Indica que todas as requisições podem receber
+  // Body em JSON. A partir disso, o Express aplica
+  // um JSON.parse para o conteúdo recebido
+  app.use(express.json())
 
-app.get('/', function (req, res) {
-  res.send('Hello World')
-})
+  app.get('/', function (req, res) {
+    res.send('Hello World')
+  })
 
-app.get("/oi", function (req, res) {
-  res.send("Olá, mundo!")
-})
+  app.get("/oi", function (req, res) {
+    res.send("Olá, mundo!")
+  })
 
-const lista = ["Rick Sanchez", "Morty Smith", "Summer Smith"]
-//              0               1              2
+  const lista = ["Rick Sanchez", "Morty Smith", "Summer Smith"]
+  //              0               1              2
 
-// Read All - [GET] /item
-app.get("/item", function (req, res) {
-  res.send(lista.filter(Boolean))
-})
+  // Read All - [GET] /item
+  app.get("/item", async function (req, res) {
+    const items = await collection.find().toArray();
 
-// Read by ID - [GET] /item/:id
-app.get("/item/:id", function (req, res) {
-  // Pegamos o ID de rota e subtraímos 1 para ficar
-  // equivalente ao índice da lista que começa em 0
-  const id = req.params.id - 1
+    res.send(items);
+  })
 
-  // Acessamos o item na lista, usando o índice corrigido
-  const item = lista[id]
+  // Read by ID - [GET] /item/:id
+  app.get("/item/:id", function (req, res) {
+    // Pegamos o ID de rota e subtraímos 1 para ficar
+    // equivalente ao índice da lista que começa em 0
+    const id = req.params.id - 1
 
-  // Enviamos o item como resposta do endpoint
-  res.send(item)
-})
+    // Acessamos o item na lista, usando o índice corrigido
+    const item = lista[id]
 
-// Create - [POST] /item
-app.post("/item", function (req, res) {
-  // Extraímos o nome do Body da Requisição
-  const item = req.body.nome
+    // Enviamos o item como resposta do endpoint
+    res.send(item)
+  })
 
-  // Adicionamos o item recebido na lista
-  lista.push(item)
+  // Create - [POST] /item
+  app.post("/item", function (req, res) {
+    // Extraímos o nome do Body da Requisição
+    const item = req.body.nome
 
-  // Exibimos uma mensagem de sucesso
-  res.send("Item adicionado com sucesso!")
-})
+    // Adicionamos o item recebido na lista
+    lista.push(item)
 
-// Update - [PUT] /item/:id
-app.put("/item/:id", function (req, res) {
-  // Obtemos o ID do parâmetro de rota e fazemos
-  // a correção de índice
-  const id = req.params.id - 1
+    // Exibimos uma mensagem de sucesso
+    res.send("Item adicionado com sucesso!")
+  })
 
-  // Obtemos o novo item a ser atualizado
-  const novoItem = req.body.nome
+  // Update - [PUT] /item/:id
+  app.put("/item/:id", function (req, res) {
+    // Obtemos o ID do parâmetro de rota e fazemos
+    // a correção de índice
+    const id = req.params.id - 1
 
-  // Atualizamos o valor recebido na lista, usando
-  // a posição ID para garantir que atualizamos
-  // o item correto
-  lista[id] = novoItem
+    // Obtemos o novo item a ser atualizado
+    const novoItem = req.body.nome
 
-  // Enviamos uma mensagem de sucesso
-  res.send("Item atualizado com sucesso!")
-})
+    // Atualizamos o valor recebido na lista, usando
+    // a posição ID para garantir que atualizamos
+    // o item correto
+    lista[id] = novoItem
 
-// Delete - [DELETE] /item/:id
-app.delete("/item/:id", function (req, res) {
-  // Obtemos o ID do Parâmetro de rota
-  const id = req.params.id - 1
+    // Enviamos uma mensagem de sucesso
+    res.send("Item atualizado com sucesso!")
+  })
 
-  // Removemos o item da lista
-  delete lista[id]
+  // Delete - [DELETE] /item/:id
+  app.delete("/item/:id", function (req, res) {
+    // Obtemos o ID do Parâmetro de rota
+    const id = req.params.id - 1
 
-  // Exibimos uma mensagem de sucesso
-  res.send("Item removido com sucesso!")
-})
+    // Removemos o item da lista
+    delete lista[id]
 
-app.listen(3000)
+    // Exibimos uma mensagem de sucesso
+    res.send("Item removido com sucesso!")
+  })
+
+  app.listen(3000)
 }
 
 main();
