@@ -1,81 +1,105 @@
-const express = require('express')
-const app = express()
+const express = require('express');
+const { MongoClient, ObjectId } = require('mongodb');
 
-// Registrar um Middleware de JSON
-// Indica que todas as requisições podem receber
-// Body em JSON. A partir disso, o Express aplica
-// um JSON.parse para o conteúdo recebido
-app.use(express.json())
+const dbUrl = "mongodb+srv://admin:yJaZxMwMfh9rbAG3@cluster0.0qd0vfc.mongodb.net";
+const client = new MongoClient(dbUrl);
+const dbName = "ocean-backend-dezembro-2023";
 
-app.get('/', function (req, res) {
-  res.send('Hello World')
-})
+async function main() {
+  console.log("Conectando ao banco de dados...");
+  await client.connect();
+  console.log("Banco de dados conectado com sucesso");
 
-app.get("/oi", function (req, res) {
-  res.send("Olá, mundo!")
-})
+  const db = client.db(dbName);
+  const collection = db.collection("item");
 
-const lista = ["Rick Sanchez", "Morty Smith", "Summer Smith"]
-//              0               1              2
+  const app = express()
 
-// Read All - [GET] /item
-app.get("/item", function (req, res) {
-  res.send(lista.filter(Boolean))
-})
+  // Registrar um Middleware de JSON
+  // Indica que todas as requisições podem receber
+  // Body em JSON. A partir disso, o Express aplica
+  // um JSON.parse para o conteúdo recebido
+  app.use(express.json())
 
-// Read by ID - [GET] /item/:id
-app.get("/item/:id", function (req, res) {
-  // Pegamos o ID de rota e subtraímos 1 para ficar
-  // equivalente ao índice da lista que começa em 0
-  const id = req.params.id - 1
+  app.get('/', function (req, res) {
+    res.send('Hello World')
+  })
 
-  // Acessamos o item na lista, usando o índice corrigido
-  const item = lista[id]
+  app.get("/oi", function (req, res) {
+    res.send("Olá, mundo!")
+  })
 
-  // Enviamos o item como resposta do endpoint
-  res.send(item)
-})
+  const lista = ["Rick Sanchez", "Morty Smith", "Summer Smith"]
+  //              0               1              2
 
-// Create - [POST] /item
-app.post("/item", function (req, res) {
-  // Extraímos o nome do Body da Requisição
-  const item = req.body.nome
+  // Read All - [GET] /item
+  app.get("/item", async function (req, res) {
+    const items = await collection.find().toArray();
 
-  // Adicionamos o item recebido na lista
-  lista.push(item)
+    res.send(items);
+  })
 
-  // Exibimos uma mensagem de sucesso
-  res.send("Item adicionado com sucesso!")
-})
+  // Read by ID - [GET] /item/:id
+  app.get("/item/:id", async function (req, res) {
+    // Pegamos o ID de rota 
+    const id = req.params.id 
 
-// Update - [PUT] /item/:id
-app.put("/item/:id", function (req, res) {
-  // Obtemos o ID do parâmetro de rota e fazemos
-  // a correção de índice
-  const id = req.params.id - 1
+    // Acessamos o item na lista, usando o índice corrigido
+    const item = await collection.findOne({
+      _id: new ObjectId(id)
+    }) 
 
-  // Obtemos o novo item a ser atualizado
-  const novoItem = req.body.nome
+    // Enviamos o item como resposta do endpoint
+    res.send(item)
+  })
 
-  // Atualizamos o valor recebido na lista, usando
-  // a posição ID para garantir que atualizamos
-  // o item correto
-  lista[id] = novoItem
+  // Create - [POST] /item
+  app.post("/item", async function (req, res) {
+    // Pegamos o Body da Requisição
+    const item = req.body;
 
-  // Enviamos uma mensagem de sucesso
-  res.send("Item atualizado com sucesso!")
-})
+    // Adicionamos o item recebido na collectoin 
+    await collection.insertOne(item);
 
-// Delete - [DELETE] /item/:id
-app.delete("/item/:id", function (req, res) {
-  // Obtemos o ID do Parâmetro de rota
-  const id = req.params.id - 1
+    // Exibimos o item adicionado 
+    res.send(item);
+  })
 
-  // Removemos o item da lista
-  delete lista[id]
+  // Update - [PUT] /item/:id
+  app.put("/item/:id", async function (req, res) {
+    // Obtemos o ID do parâmetro de rota 
+    const id = req.params.id; 
 
-  // Exibimos uma mensagem de sucesso
-  res.send("Item removido com sucesso!")
-})
+    // Obtemos o novo item a ser atualizado
+    const novoItem = req.body;
 
-app.listen(3000)
+    // Atualizamos o valor recebido na collectoin, usando
+    // o ID para garantir que atualizamos
+    // o item correto
+    await collection.updateOne(
+      {_id: new ObjectId(id)},
+      {$set: novoItem}
+    );
+
+    // Enviamos uma mensagem de sucesso
+    res.send(novoItem)
+  })
+
+  // Delete - [DELETE] /item/:id
+  app.delete("/item/:id", async function (req, res) {
+    // Obtemos o ID do Parâmetro de rota
+    const id = req.params.id 
+
+    // Removemos o item da collection
+    await collection.deleteOne(
+      {_id: new ObjectId(id)}
+    );
+
+    // Exibimos uma mensagem de sucesso
+    res.send("Item removido com sucesso!")
+  })
+
+  app.listen(3000)
+}
+
+main();
