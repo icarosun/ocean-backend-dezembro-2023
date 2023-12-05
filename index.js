@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require('express');
 const { MongoClient, ObjectId } = require('mongodb');
+const cors = require("cors");
 
 const dbUrl = process.env.DATABASE_URL; 
 const client = new MongoClient(dbUrl); 
@@ -21,6 +22,8 @@ async function main() {
   // Body em JSON. A partir disso, o Express aplica
   // um JSON.parse para o conteúdo recebido
   app.use(express.json())
+
+  app.use(cors());
 
   app.get('/', function (req, res) {
     res.send('Hello World')
