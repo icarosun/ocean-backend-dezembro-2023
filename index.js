@@ -41,8 +41,7 @@ async function main() {
 
   // Read by ID - [GET] /item/:id
   app.get("/item/:id", async function (req, res) {
-    // Pegamos o ID de rota e subtraímos 1 para ficar
-    // equivalente ao índice da lista que começa em 0
+    // Pegamos o ID de rota 
     const id = req.params.id 
 
     // Acessamos o item na lista, usando o índice corrigido
@@ -55,15 +54,15 @@ async function main() {
   })
 
   // Create - [POST] /item
-  app.post("/item", function (req, res) {
-    // Extraímos o nome do Body da Requisição
-    const item = req.body.nome
+  app.post("/item", async function (req, res) {
+    // Pegamos o Body da Requisição
+    const item = req.body;
 
-    // Adicionamos o item recebido na lista
-    lista.push(item)
+    // Adicionamos o item recebido na collectoin 
+    await collection.insertOne(item);
 
-    // Exibimos uma mensagem de sucesso
-    res.send("Item adicionado com sucesso!")
+    // Exibimos o item adicionado 
+    res.send(item);
   })
 
   // Update - [PUT] /item/:id
