@@ -1,9 +1,10 @@
+require("dotenv").config();
 const express = require('express');
 const { MongoClient, ObjectId } = require('mongodb');
 
-const dbUrl = "mongodb+srv://admin:yJaZxMwMfh9rbAG3@cluster0.0qd0vfc.mongodb.net";
-const client = new MongoClient(dbUrl);
-const dbName = "ocean-backend-dezembro-2023";
+const dbUrl = process.env.DATABASE_URL; 
+const client = new MongoClient(dbUrl); 
+const dbName = process.env.DATABASE_NAME;
 
 async function main() {
   console.log("Conectando ao banco de dados...");
