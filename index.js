@@ -33,6 +33,10 @@ async function main() {
     res.send("Olá, mundo!")
   })
 
+  app.get("/hallo", functoin (req, res) {
+    res.send("Hallo");
+  }
+
   const lista = ["Rick Sanchez", "Morty Smith", "Summer Smith"]
   //              0               1              2
 
